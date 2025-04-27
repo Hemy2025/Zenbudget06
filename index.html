@@ -58,7 +58,7 @@
     button:hover {
       background-color: #0056b3;
     }
-    #storico-fatture, #riepilogo-contributi, #pagamenti-previsti {
+    #storico-fatture, #riepilogo-contributi, #pagamenti-previsti, #residuo-container {
       margin-top: 30px;
       text-align: center;
       width: 90%;
@@ -95,7 +95,7 @@
 </head>
 <body>
   <header>
-    <img src="logo.png?v=6" alt="Logo">
+    <img src="logo.png?v=7" alt="Logo">
     <h1>Agenda Fiscale per il Regime Forfettario</h1>
   </header>
 
@@ -154,7 +154,11 @@
         </thead>
         <tbody id="lista-fatture"></tbody>
       </table>
-      <h4 id="totali-trimestre"></h4>
+    </div>
+
+    <div id="residuo-container" style="display:none;">
+      <h3>Residuo Fatturabile</h3>
+      <p id="residuo"></p>
     </div>
 
     <div id="riepilogo-contributi" style="display:none;">
