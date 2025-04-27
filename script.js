@@ -8,6 +8,7 @@ function setTipoAzienda(tipo) {
   document.getElementById('storico-fatture').style.display = 'block';
   document.getElementById('riepilogo-contributi').style.display = 'block';
   document.getElementById('pagamenti-previsti').style.display = 'block';
+  document.getElementById('residuo-container').style.display = 'block';
   document.getElementById('pdf-generator').style.display = 'block';
 }
 
@@ -129,40 +130,38 @@ async function generaF24PDF() {
   const secondoAcconto = saldo * 0.6;
 
   let importoSelezionato = 0;
-  let descrizione = "";
   let codiceTributo = "";
-
+  let descrizione = "";
   const annoCorrente = new Date().getFullYear();
 
   if (tipoPagamento === 'saldo') {
     importoSelezionato = saldo;
-    descrizione = "Saldo 30 Giugno";
     codiceTributo = "8846";
+    descrizione = "Saldo 30 Giugno";
   } else if (tipoPagamento === 'primo-acconto') {
     importoSelezionato = primoAcconto;
-    descrizione = "Primo Acconto 30 Giugno";
     codiceTributo = "8847";
+    descrizione = "Primo Acconto 30 Giugno";
   } else if (tipoPagamento === 'secondo-acconto') {
     importoSelezionato = secondoAcconto;
-    descrizione = "Secondo Acconto 30 Novembre";
     codiceTributo = "8847";
+    descrizione = "Secondo Acconto 30 Novembre";
   }
 
-  // Aggiunta dell'immagine di sfondo del Modello F24
+  // Aggiunta immagine sfondo Modello F24
   const img = new Image();
-  img.src = 'f24_template.jpg'; // Devi caricare questa immagine nel tuo repository GitHub accanto a index.html
-  
+  img.src = 'f24_template.jpg';
+
   img.onload = function() {
     doc.addImage(img, 'JPEG', 0, 0, 210, 297);
 
-    // Scrittura dati sopra il modello
     doc.setFontSize(10);
-    doc.text(nome, 20, 40);
-    doc.text(codiceFiscale, 150, 40);
+    doc.text(nome, 20, 37);
+    doc.text(codiceFiscale, 150, 37);
 
-    doc.text(codiceTributo, 30, 120);
-    doc.text(annoCorrente.toString(), 70, 120);
-    doc.text(importoSelezionato.toFixed(2) + " €", 150, 120);
+    doc.text(codiceTributo, 22, 120);
+    doc.text(annoCorrente.toString(), 75, 120);
+    doc.text(importoSelezionato.toFixed(2) + " €", 140, 120);
 
     doc.save(`F24_${tipoPagamento}.pdf`);
   };
