@@ -6,6 +6,7 @@ function setTipoAzienda(tipo) {
   tipoAzienda = tipo;
   document.getElementById('inputs-fattura').style.display = 'block';
   document.getElementById('storico-fatture').style.display = 'block';
+  document.getElementById('riepilogo-contributi').style.display = 'block';
   document.getElementById('pagamenti-previsti').style.display = 'block';
   document.getElementById('pdf-generator').style.display = 'block';
 }
@@ -42,6 +43,7 @@ function aggiungiFattura() {
   aggiornaStorico();
   aggiornaResiduo();
   aggiornaPagamenti();
+  aggiornaRiepilogo();
 }
 
 function aggiornaStorico() {
@@ -84,11 +86,28 @@ function aggiornaPagamenti() {
   `;
 }
 
+function aggiornaRiepilogo() {
+  const totaleImponibile = fatture.reduce((acc, f) => acc + f.imponibile, 0);
+  const totaleINPS = fatture.reduce((acc, f) => acc + f.inps, 0);
+  const totaleImposte = fatture.reduce((acc, f) => acc + f.imposta, 0);
+  const totaleNetto = fatture.reduce((acc, f) => acc + f.netto, 0);
+  const totaleAccantonare = totaleINPS + totaleImposte;
+
+  document.getElementById("riepilogo").innerHTML = `
+    <strong>Totale Imponibile:</strong> € ${totaleImponibile.toFixed(2)}<br>
+    <strong>Totale Contributi Previdenziali:</strong> € ${totaleINPS.toFixed(2)}<br>
+    <strong>Totale Imposte:</strong> € ${totaleImposte.toFixed(2)}<br>
+    <strong>Totale Netto:</strong> € ${totaleNetto.toFixed(2)}<br>
+    <strong>Totale da Accantonare:</strong> € ${totaleAccantonare.toFixed(2)}
+  `;
+}
+
 function eliminaFattura(index) {
   fatture.splice(index, 1);
   aggiornaStorico();
   aggiornaResiduo();
   aggiornaPagamenti();
+  aggiornaRiepilogo();
 }
 
 async function generaF24PDF() {
@@ -111,47 +130,40 @@ async function generaF24PDF() {
 
   let importoSelezionato = 0;
   let descrizione = "";
+  let codiceTributo = "";
+
+  const annoCorrente = new Date().getFullYear();
 
   if (tipoPagamento === 'saldo') {
     importoSelezionato = saldo;
     descrizione = "Saldo 30 Giugno";
+    codiceTributo = "8846";
   } else if (tipoPagamento === 'primo-acconto') {
     importoSelezionato = primoAcconto;
-    descrizione = "Primo Acconto 30 Giugno (40%)";
+    descrizione = "Primo Acconto 30 Giugno";
+    codiceTributo = "8847";
   } else if (tipoPagamento === 'secondo-acconto') {
     importoSelezionato = secondoAcconto;
-    descrizione = "Secondo Acconto 30 Novembre (60%)";
+    descrizione = "Secondo Acconto 30 Novembre";
+    codiceTributo = "8847";
   }
 
-  // Generazione PDF fac-simile stile F24
-  doc.setFontSize(16);
-  doc.text("Fac-simile Modello F24 - Regime Forfettario", 20, 20);
+  // Aggiunta dell'immagine di sfondo del Modello F24
+  const img = new Image();
+  img.src = 'f24_template.jpg'; // Devi caricare questa immagine nel tuo repository GitHub accanto a index.html
+  
+  img.onload = function() {
+    doc.addImage(img, 'JPEG', 0, 0, 210, 297);
 
-  doc.setFontSize(12);
-  doc.text(`Contribuente: ${nome}`, 20, 40);
-  doc.text(`Codice Fiscale: ${codiceFiscale}`, 20, 50);
+    // Scrittura dati sopra il modello
+    doc.setFontSize(10);
+    doc.text(nome, 20, 40);
+    doc.text(codiceFiscale, 150, 40);
 
-  doc.setLineWidth(0.5);
-  doc.line(10, 60, 200, 60);
+    doc.text(codiceTributo, 30, 120);
+    doc.text(annoCorrente.toString(), 70, 120);
+    doc.text(importoSelezionato.toFixed(2) + " €", 150, 120);
 
-  doc.setFontSize(12);
-  doc.text("Sezione ERARIO - Codici Tributo INPS", 20, 70);
-
-  // Tabella semplice
-  doc.setFontSize(10);
-  doc.text("Codice Tributo", 20, 80);
-  doc.text("Anno Riferimento", 70, 80);
-  doc.text("Importo a Debito", 130, 80);
-
-  // Riga codici
-  doc.text("8846", 25, 90);
-  doc.text("2024", 75, 90);
-  doc.text(`€ ${importoSelezionato.toFixed(2)}`, 130, 90);
-
-  doc.line(10, 95, 200, 95);
-
-  doc.setFontSize(10);
-  doc.text("*Nota: Questo documento è un fac-simile e non valido per il pagamento ufficiale.", 20, 110);
-
-  doc.save(`F24_${tipoPagamento}.pdf`);
+    doc.save(`F24_${tipoPagamento}.pdf`);
+  };
 }
