@@ -4,12 +4,12 @@ const limiteAnnuale = 85000;
 
 function setTipoAzienda(tipo) {
   tipoAzienda = tipo;
-  document.getElementById('inputs-fattura').style.display = 'block';
-  document.getElementById('storico-fatture').style.display = 'block';
-  document.getElementById('riepilogo-contributi').style.display = 'block';
-  document.getElementById('pagamenti-previsti').style.display = 'block';
-  document.getElementById('residuo-container').style.display = 'block';
-  document.getElementById('pdf-generator').style.display = 'block';
+  document.getElementById('inputs-fattura').classList.remove('hidden');
+  document.getElementById('storico-fatture').classList.remove('hidden');
+  document.getElementById('riepilogo-contributi').classList.remove('hidden');
+  document.getElementById('pagamenti-previsti').classList.remove('hidden');
+  document.getElementById('residuo-container').classList.remove('hidden');
+  document.getElementById('pdf-generator').classList.remove('hidden');
 }
 
 function getTrimestre(data) {
@@ -54,15 +54,15 @@ function aggiornaStorico() {
   fatture.forEach((f, index) => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${f.data}</td>
-      <td>€ ${f.importo.toFixed(2)}</td>
-      <td>€ ${f.imponibile.toFixed(2)}</td>
-      <td>€ ${f.inps.toFixed(2)}</td>
-      <td>€ ${f.imposta.toFixed(2)}</td>
-      <td>€ ${f.totale.toFixed(2)}</td>
-      <td>€ ${f.netto.toFixed(2)}</td>
-      <td>${f.trimestre}</td>
-      <td><button class="delete-btn" onclick="eliminaFattura(${index})">🗑️</button></td>
+      <td class="p-2">${f.data}</td>
+      <td class="p-2">€ ${f.importo.toFixed(2)}</td>
+      <td class="p-2">€ ${f.imponibile.toFixed(2)}</td>
+      <td class="p-2">€ ${f.inps.toFixed(2)}</td>
+      <td class="p-2">€ ${f.imposta.toFixed(2)}</td>
+      <td class="p-2">€ ${f.totale.toFixed(2)}</td>
+      <td class="p-2">€ ${f.netto.toFixed(2)}</td>
+      <td class="p-2">${f.trimestre}</td>
+      <td class="p-2 text-center"><button class="text-red-600 hover:text-red-800" onclick="eliminaFattura(${index})">🗑️</button></td>
     `;
     tbody.appendChild(row);
   });
@@ -129,26 +129,9 @@ async function generaF24PDF() {
   const primoAcconto = saldo * 0.4;
   const secondoAcconto = saldo * 0.6;
 
-  let importoSelezionato = 0;
-  let codiceTributo = "";
-  let descrizione = "";
   const annoCorrente = new Date().getFullYear();
+  const annoPrecedente = annoCorrente - 1;
 
-  if (tipoPagamento === 'saldo') {
-    importoSelezionato = saldo;
-    codiceTributo = "8846";
-    descrizione = "Saldo 30 Giugno";
-  } else if (tipoPagamento === 'primo-acconto') {
-    importoSelezionato = primoAcconto;
-    codiceTributo = "8847";
-    descrizione = "Primo Acconto 30 Giugno";
-  } else if (tipoPagamento === 'secondo-acconto') {
-    importoSelezionato = secondoAcconto;
-    codiceTributo = "8847";
-    descrizione = "Secondo Acconto 30 Novembre";
-  }
-
-  // Aggiunta immagine sfondo Modello F24
   const img = new Image();
   img.src = 'f24_template.jpg';
 
@@ -159,9 +142,25 @@ async function generaF24PDF() {
     doc.text(nome, 20, 37);
     doc.text(codiceFiscale, 150, 37);
 
-    doc.text(codiceTributo, 22, 120);
-    doc.text(annoCorrente.toString(), 75, 120);
-    doc.text(importoSelezionato.toFixed(2) + " €", 140, 120);
+    if (tipoPagamento === 'saldo') {
+      doc.text('8846', 22, 120);
+      doc.text(annoPrecedente.toString(), 65, 120);
+      doc.text(saldo.toFixed(2) + " €", 140, 120);
+
+      doc.text('8847', 22, 130);
+      doc.text(annoCorrente.toString(), 65, 130);
+      doc.text(primoAcconto.toFixed(2) + " €", 140, 130);
+
+    } else if (tipoPagamento === 'primo-acconto') {
+      doc.text('8847', 22, 120);
+      doc.text(annoCorrente.toString(), 65, 120);
+      doc.text(primoAcconto.toFixed(2) + " €", 140, 120);
+
+    } else if (tipoPagamento === 'secondo-acconto') {
+      doc.text('8847', 22, 120);
+      doc.text(annoCorrente.toString(), 65, 120);
+      doc.text(secondoAcconto.toFixed(2) + " €", 140, 120);
+    }
 
     doc.save(`F24_${tipoPagamento}.pdf`);
   };
