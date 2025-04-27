@@ -128,6 +128,7 @@ async function generaF24PDF() {
   const saldo = totaleImposte;
   const primoAcconto = saldo * 0.4;
   const secondoAcconto = saldo * 0.6;
+  const totaleDaVersare = saldo + primoAcconto;
 
   const annoCorrente = new Date().getFullYear();
   const annoPrecedente = annoCorrente - 1;
@@ -139,27 +140,37 @@ async function generaF24PDF() {
     doc.addImage(img, 'JPEG', 0, 0, 210, 297);
 
     doc.setFontSize(10);
-    doc.text(nome, 20, 37);
-    doc.text(codiceFiscale, 150, 37);
+    // Nome e Cognome
+    doc.text(nome, 25, 42);
+    // Codice Fiscale
+    doc.text(codiceFiscale, 100, 41);
 
     if (tipoPagamento === 'saldo') {
+      // Prima riga: saldo 8846
       doc.text('8846', 22, 120);
-      doc.text(annoPrecedente.toString(), 65, 120);
-      doc.text(saldo.toFixed(2) + " €", 140, 120);
+      doc.text(annoPrecedente.toString(), 60, 120);
+      doc.text(saldo.toFixed(2).replace('.', ','), 145, 120);
 
+      // Seconda riga: primo acconto 8847
       doc.text('8847', 22, 130);
-      doc.text(annoCorrente.toString(), 65, 130);
-      doc.text(primoAcconto.toFixed(2) + " €", 140, 130);
+      doc.text(annoCorrente.toString(), 60, 130);
+      doc.text(primoAcconto.toFixed(2).replace('.', ','), 145, 130);
 
-    } else if (tipoPagamento === 'primo-acconto') {
-      doc.text('8847', 22, 120);
-      doc.text(annoCorrente.toString(), 65, 120);
-      doc.text(primoAcconto.toFixed(2) + " €", 140, 120);
+      // Casella C
+      doc.text(totaleDaVersare.toFixed(2).replace('.', ','), 170, 200);
+      // Casella Saldo Finale
+      doc.text(totaleDaVersare.toFixed(2).replace('.', ','), 170, 250);
 
     } else if (tipoPagamento === 'secondo-acconto') {
+      // Riga secondo acconto
       doc.text('8847', 22, 120);
-      doc.text(annoCorrente.toString(), 65, 120);
-      doc.text(secondoAcconto.toFixed(2) + " €", 140, 120);
+      doc.text(annoCorrente.toString(), 60, 120);
+      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 145, 120);
+
+      // Casella C
+      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 170, 200);
+      // Casella Saldo Finale
+      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 170, 250);
     }
 
     doc.save(`F24_${tipoPagamento}.pdf`);
