@@ -123,18 +123,35 @@ async function generaF24PDF() {
     descrizione = "Secondo Acconto 30 Novembre (60%)";
   }
 
-  // Creazione PDF
+  // Generazione PDF fac-simile stile F24
   doc.setFontSize(16);
-  doc.text("Fac-simile Modello F24", 20, 20);
+  doc.text("Fac-simile Modello F24 - Regime Forfettario", 20, 20);
 
   doc.setFontSize(12);
   doc.text(`Contribuente: ${nome}`, 20, 40);
   doc.text(`Codice Fiscale: ${codiceFiscale}`, 20, 50);
-  doc.text(`Tipo Pagamento: ${descrizione}`, 20, 70);
-  doc.text(`Importo Dovuto: € ${importoSelezionato.toFixed(2)}`, 20, 80);
+
+  doc.setLineWidth(0.5);
+  doc.line(10, 60, 200, 60);
+
+  doc.setFontSize(12);
+  doc.text("Sezione ERARIO - Codici Tributo INPS", 20, 70);
+
+  // Tabella semplice
+  doc.setFontSize(10);
+  doc.text("Codice Tributo", 20, 80);
+  doc.text("Anno Riferimento", 70, 80);
+  doc.text("Importo a Debito", 130, 80);
+
+  // Riga codici
+  doc.text("8846", 25, 90);
+  doc.text("2024", 75, 90);
+  doc.text(`€ ${importoSelezionato.toFixed(2)}`, 130, 90);
+
+  doc.line(10, 95, 200, 95);
 
   doc.setFontSize(10);
-  doc.text("NOTA: Questo è solo un fac-simile non utilizzabile per il pagamento ufficiale.", 20, 110);
+  doc.text("*Nota: Questo documento è un fac-simile e non valido per il pagamento ufficiale.", 20, 110);
 
   doc.save(`F24_${tipoPagamento}.pdf`);
 }
