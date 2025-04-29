@@ -138,31 +138,48 @@ function eliminaFattura(index) {
   aggiornaRiepilogo();
 }
 
-function generaF24PDF() {
+async function generaF24PDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+
+  // Carica il template
+  const img = new Image();
+  img.src = 'f24_template.jpg';
+
+  await new Promise((resolve) => {
+    img.onload = resolve;
+  });
+
+  doc.addImage(img, 'JPEG', 0, 0, 210, 297); // Dimensione A4
+
   const nome = document.getElementById('nome').value;
   const cognome = document.getElementById('cognome').value;
   const codiceFiscale = document.getElementById('codiceFiscale').value;
   const tipoPagamento = document.getElementById('tipoPagamento').value;
+  const annoCorrente = new Date().getFullYear();
 
-  doc.setFontSize(14);
-  doc.text("Fac-simile Modello F24", 20, 20);
-  doc.setFontSize(12);
-  doc.text(`Contribuente: ${nome} ${cognome}`, 20, 30);
-  doc.text(`Codice Fiscale: ${codiceFiscale}`, 20, 38);
-  doc.text(`Tipo Pagamento: ${tipoPagamento}`, 20, 46);
-
-  const imposteTotali = fatture.reduce((acc, f) => acc + f.imposta, 0);
-  const saldo = imposteTotali;
+  const totaleImposte = fatture.reduce((acc, f) => acc + f.imposta, 0);
+  const saldo = totaleImposte;
   const acconto1 = saldo * 0.4;
   const acconto2 = saldo * 0.6;
 
+  doc.setFontSize(10);
+  doc.text(cognome, 20, 32); // Cognome
+  doc.text(nome, 100, 32); // Nome
+  doc.text(codiceFiscale, 20, 42); // Codice Fiscale
+
   if (tipoPagamento === 'saldo') {
-    doc.text(`Saldo da versare: € ${saldo.toFixed(2)}`, 20, 60);
-    doc.text(`Primo Acconto: € ${acconto1.toFixed(2)}`, 20, 68);
-  } else {
-    doc.text(`Secondo Acconto da versare: € ${acconto2.toFixed(2)}`, 20, 60);
+    doc.text('8846', 20, 100); // codice tributo saldo
+    doc.text(`${annoCorrente - 1}`, 50, 100); // anno saldo
+    doc.text(saldo.toFixed(2).replace('.', ','), 140, 100); // importo saldo
+
+    doc.text('8847', 20, 110); // codice tributo primo acconto
+    doc.text(`${annoCorrente}`, 50, 110); // anno primo acconto
+    doc.text(acconto1.toFixed(2).replace('.', ','), 140, 110); // importo primo acconto
+  } else if (tipoPagamento === 'secondo-acconto') {
+    doc.text('8847', 20, 120); // codice tributo secondo acconto
+    doc.text(`${annoCorrente}`, 50, 120); // anno secondo acconto
+    doc.text(acconto2.toFixed(2).replace('.', ','), 140, 120); // importo secondo acconto
   }
 
   doc.save(`F24_${tipoPagamento}.pdf`);
