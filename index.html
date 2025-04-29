@@ -41,11 +41,15 @@
       <div class="grid md:grid-cols-4 gap-4">
         <input type="date" id="data" class="p-3 border border-gray-300 rounded-lg" />
         <input type="number" id="fatturato" placeholder="Importo (€)" class="p-3 border border-gray-300 rounded-lg" />
+        <select id="ateco" class="p-3 border border-gray-300 rounded-lg">
+          <option value="0.78">78% - Servizi vari</option>
+          <option value="0.67">67% - Professionisti</option>
+          <option value="0.40">40% - Commercio</option>
+        </select>
         <select id="previdenza" class="p-3 border border-gray-300 rounded-lg">
           <option value="gestione-separata">Gestione Separata</option>
           <option value="nessuna">Senza Cassa</option>
         </select>
-        <input type="number" step="0.01" id="ateco" placeholder="Coefficiente ATECO" class="p-3 border border-gray-300 rounded-lg" />
       </div>
       <button onclick="aggiungiFattura()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Aggiungi Fattura</button>
     </section>
@@ -97,7 +101,7 @@
         <option value="secondo-acconto">Secondo Acconto (30 Novembre)</option>
       </select>
       <br />
-      <button onclick="generaF24PDF()" class="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-purple-800">Genera PDF</button>
+      <button onclick="generaF24PDF()" class="mt-4 bg-purple-700 text-white px-6 py-2 rounded-lg hover:bg-purple-800">Genera PDF</button>
     </section>
 
   </main>
