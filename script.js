@@ -116,11 +116,12 @@ async function generaF24PDF() {
   const doc = new jsPDF();
 
   const nome = document.getElementById('nome').value.trim();
+  const cognome = document.getElementById('cognome').value.trim();
   const codiceFiscale = document.getElementById('codiceFiscale').value.trim();
   const tipoPagamento = document.getElementById('tipoPagamento').value;
 
-  if (!nome || !codiceFiscale) {
-    alert('Per favore, inserisci Nome/Cognome e Codice Fiscale.');
+  if (!nome || !cognome || !codiceFiscale) {
+    alert('Per favore, inserisci Nome, Cognome e Codice Fiscale.');
     return;
   }
 
@@ -140,21 +141,23 @@ async function generaF24PDF() {
     doc.addImage(img, 'JPEG', 0, 0, 210, 297);
 
     doc.setFontSize(10);
-    // Nome e Cognome
-    doc.text(nome, 25, 42);
+    // Cognome
+    doc.text(cognome, 50, 65);
+    // Nome
+    doc.text(nome, 180, 65);
     // Codice Fiscale
-    doc.text(codiceFiscale, 100, 41);
+    doc.text(codiceFiscale, 170, 120);
 
     if (tipoPagamento === 'saldo') {
       // Prima riga: saldo 8846
-      doc.text('8846', 22, 120);
-      doc.text(annoPrecedente.toString(), 60, 120);
-      doc.text(saldo.toFixed(2).replace('.', ','), 145, 120);
+      doc.text('8846', 30, 145);
+      doc.text(annoPrecedente.toString(), 90, 145);
+      doc.text(saldo.toFixed(2).replace('.', ','), 160, 145);
 
       // Seconda riga: primo acconto 8847
-      doc.text('8847', 22, 130);
-      doc.text(annoCorrente.toString(), 60, 130);
-      doc.text(primoAcconto.toFixed(2).replace('.', ','), 145, 130);
+      doc.text('8847', 30, 155);
+      doc.text(annoCorrente.toString(), 90, 155);
+      doc.text(primoAcconto.toFixed(2).replace('.', ','), 160, 155);
 
       // Casella C
       doc.text(totaleDaVersare.toFixed(2).replace('.', ','), 170, 200);
@@ -163,9 +166,9 @@ async function generaF24PDF() {
 
     } else if (tipoPagamento === 'secondo-acconto') {
       // Riga secondo acconto
-      doc.text('8847', 22, 120);
-      doc.text(annoCorrente.toString(), 60, 120);
-      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 145, 120);
+      doc.text('8847', 30, 145);
+      doc.text(annoCorrente.toString(), 90, 145);
+      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 160, 145);
 
       // Casella C
       doc.text(secondoAcconto.toFixed(2).replace('.', ','), 170, 200);
