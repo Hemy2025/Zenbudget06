@@ -121,7 +121,7 @@ async function generaF24PDF() {
   const tipoPagamento = document.getElementById('tipoPagamento').value;
 
   if (!nome || !cognome || !codiceFiscale) {
-    alert('Per favore, inserisci Nome, Cognome e Codice Fiscale.');
+    alert('Inserisci Nome, Cognome e Codice Fiscale.');
     return;
   }
 
@@ -135,45 +135,48 @@ async function generaF24PDF() {
   const annoPrecedente = annoCorrente - 1;
 
   const img = new Image();
-  img.src = 'f24_template.jpg';
+  img.src = 'f24_template.jpg'; // Devi assicurarti che questo file sia presente nel repository
 
   img.onload = function() {
     doc.addImage(img, 'JPEG', 0, 0, 210, 297);
 
     doc.setFontSize(10);
-    // Cognome
-    doc.text(cognome, 50, 65);
-    // Nome
-    doc.text(nome, 180, 65);
-    // Codice Fiscale
-    doc.text(codiceFiscale, 170, 120);
+
+    // Nome e Cognome
+    doc.text(cognome, 40, 67);
+    doc.text(nome, 170, 67);
+
+    // Codice fiscale
+    doc.text(codiceFiscale, 70, 60);
 
     if (tipoPagamento === 'saldo') {
-      // Prima riga: saldo 8846
-      doc.text('8846', 30, 145);
-      doc.text(annoPrecedente.toString(), 90, 145);
-      doc.text(saldo.toFixed(2).replace('.', ','), 160, 145);
+      // Codice 8846
+      doc.text('8846', 20, 105);
+      doc.text(annoPrecedente.toString(), 80, 105);
+      doc.text(saldo.toFixed(2).replace('.', ','), 170, 105);
 
-      // Seconda riga: primo acconto 8847
-      doc.text('8847', 30, 155);
-      doc.text(annoCorrente.toString(), 90, 155);
-      doc.text(primoAcconto.toFixed(2).replace('.', ','), 160, 155);
+      // Codice 8847
+      doc.text('8847', 20, 115);
+      doc.text(annoCorrente.toString(), 80, 115);
+      doc.text(primoAcconto.toFixed(2).replace('.', ','), 170, 115);
 
-      // Casella C
-      doc.text(totaleDaVersare.toFixed(2).replace('.', ','), 170, 200);
-      // Casella Saldo Finale
-      doc.text(totaleDaVersare.toFixed(2).replace('.', ','), 170, 250);
+      // Casella C-D
+      doc.text(totaleDaVersare.toFixed(2).replace('.', ','), 140, 160);
+
+      // Casella Saldo finale
+      doc.text(totaleDaVersare.toFixed(2).replace('.', ','), 140, 250);
 
     } else if (tipoPagamento === 'secondo-acconto') {
-      // Riga secondo acconto
-      doc.text('8847', 30, 145);
-      doc.text(annoCorrente.toString(), 90, 145);
-      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 160, 145);
+      // Codice 8847
+      doc.text('8847', 20, 105);
+      doc.text(annoCorrente.toString(), 80, 105);
+      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 170, 105);
 
-      // Casella C
-      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 170, 200);
-      // Casella Saldo Finale
-      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 170, 250);
+      // Casella C-D
+      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 140, 160);
+
+      // Casella Saldo finale
+      doc.text(secondoAcconto.toFixed(2).replace('.', ','), 140, 250);
     }
 
     doc.save(`F24_${tipoPagamento}.pdf`);
