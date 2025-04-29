@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Agenda Fiscale - Regime Forfettario</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -10,32 +10,100 @@
 
   <!-- Header -->
   <header class="flex items-center gap-4 mb-8 w-full max-w-5xl">
-    <img src="logo.png" alt="Logo" class="h-32">
+    <img src="logo.png" alt="Logo" class="h-[180px]">
     <h1 class="text-3xl font-semibold text-gray-800">Agenda Fiscale per il Regime Forfettario</h1>
   </header>
 
   <main class="w-full max-w-5xl flex flex-col gap-10">
 
-    <!-- Inserimento Dati -->
+    <!-- Dati contribuente -->
     <section class="bg-white rounded-2xl shadow-md p-8">
-      <h2 class="text-2xl font-bold mb-6 text-blue-700">Inserisci i tuoi dati</h2>
-
-      <div class="flex flex-col md:flex-row gap-4 mb-6">
-        <input type="text" id="nome" placeholder="Nome" class="border border-gray-300 rounded-lg p-3 flex-1">
-        <input type="text" id="cognome" placeholder="Cognome" class="border border-gray-300 rounded-lg p-3 flex-1">
-        <input type="text" id="codiceFiscale" placeholder="Codice Fiscale" class="border border-gray-300 rounded-lg p-3 flex-1">
+      <h2 class="text-xl font-bold text-blue-800 mb-4">Dati del contribuente</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <input id="nome" placeholder="Nome" class="p-3 border border-gray-300 rounded-lg" />
+        <input id="cognome" placeholder="Cognome" class="p-3 border border-gray-300 rounded-lg" />
+        <input id="codiceFiscale" placeholder="Codice Fiscale" class="p-3 border border-gray-300 rounded-lg" />
       </div>
-
-      <!-- (Il resto dei tuoi campi di selezione e inserimento rimane invariato) -->
-
     </section>
 
-    <!-- (Il resto del sito: Storico, Residuo, Riepilogo, ecc., rimane invariato) -->
+    <!-- Selezione tipo azienda -->
+    <section class="bg-white rounded-2xl shadow-md p-8">
+      <h2 class="text-xl font-bold text-blue-800 mb-4">Tipo di attività</h2>
+      <div class="flex gap-6">
+        <button onclick="setTipoAzienda('start-up')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Start-up</button>
+        <button onclick="setTipoAzienda('standard')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Forfettario Standard</button>
+      </div>
+    </section>
+
+    <!-- Inserimento fattura -->
+    <section id="inputs-fattura" class="bg-white rounded-2xl shadow-md p-8 hidden">
+      <h2 class="text-xl font-bold text-blue-800 mb-4">Nuova Fattura</h2>
+      <div class="grid md:grid-cols-4 gap-4">
+        <input type="date" id="data" class="p-3 border border-gray-300 rounded-lg" />
+        <input type="number" id="fatturato" placeholder="Importo (€)" class="p-3 border border-gray-300 rounded-lg" />
+        <select id="previdenza" class="p-3 border border-gray-300 rounded-lg">
+          <option value="gestione-separata">Gestione Separata</option>
+          <option value="nessuna">Senza Cassa</option>
+        </select>
+        <input type="number" step="0.01" id="ateco" placeholder="Coefficiente ATECO" class="p-3 border border-gray-300 rounded-lg" />
+      </div>
+      <button onclick="aggiungiFattura()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Aggiungi Fattura</button>
+    </section>
+
+    <!-- Storico fatture -->
+    <section id="storico-fatture" class="bg-white rounded-2xl shadow-md p-8 hidden">
+      <h2 class="text-xl font-bold text-blue-800 mb-4">Storico Fatture</h2>
+      <table class="w-full text-sm text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="p-2 border">Data</th>
+            <th class="p-2 border">Importo</th>
+            <th class="p-2 border">Imponibile</th>
+            <th class="p-2 border">INPS</th>
+            <th class="p-2 border">Imposte</th>
+            <th class="p-2 border">Totale</th>
+            <th class="p-2 border">Netto</th>
+            <th class="p-2 border">Trimestre</th>
+            <th class="p-2 border text-center">❌</th>
+          </tr>
+        </thead>
+        <tbody id="lista-fatture"></tbody>
+      </table>
+    </section>
+
+    <!-- Residuo -->
+    <section id="residuo-container" class="bg-white rounded-2xl shadow-md p-8 hidden">
+      <h2 class="text-xl font-bold text-blue-800 mb-4">Residuo disponibile nel regime forfettario</h2>
+      <p class="text-lg">Residuo annuale disponibile: <span id="residuo" class="font-bold text-red-600">€ 85.000,00</span></p>
+    </section>
+
+    <!-- Riepilogo contributi -->
+    <section id="riepilogo-contributi" class="bg-white rounded-2xl shadow-md p-8 hidden">
+      <h2 class="text-xl font-bold text-blue-800 mb-4">Riepilogo contributi e imposte</h2>
+      <div id="riepilogo" class="text-lg text-gray-700"></div>
+    </section>
+
+    <!-- Pagamenti -->
+    <section id="pagamenti-previsti" class="bg-white rounded-2xl shadow-md p-8 hidden">
+      <h2 class="text-xl font-bold text-blue-800 mb-4">Previsione versamenti F24</h2>
+      <div id="pagamenti" class="text-lg text-gray-700"></div>
+    </section>
+
+    <!-- Generazione PDF -->
+    <section id="pdf-generator" class="bg-white rounded-2xl shadow-md p-8 hidden">
+      <h2 class="text-xl font-bold text-blue-800 mb-4">Genera Fac-simile F24</h2>
+      <select id="tipoPagamento" class="p-3 border border-gray-300 rounded-lg mb-4">
+        <option value="saldo">Saldo e Primo Acconto (30 Giugno)</option>
+        <option value="secondo-acconto">Secondo Acconto (30 Novembre)</option>
+      </select>
+      <br />
+      <button onclick="generaF24PDF()" class="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-purple-800">Genera PDF</button>
+    </section>
 
   </main>
 
   <footer class="text-center text-gray-500 text-sm mt-12">
-    © 2025 - Hemy Srls
+    Copyright 2024 - Hemy Srls
   </footer>
 
   <script src="script.js"></script>
