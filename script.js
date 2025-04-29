@@ -1,3 +1,5 @@
+// script.js completo aggiornato
+
 let tipoAzienda = '';
 let fatture = [];
 const limiteAnnuale = 85000;
@@ -17,16 +19,12 @@ function aggiornaPrevidenza() {
   const atecoField = document.getElementById("ateco");
 
   if (previdenza === "gestione-separata") {
-    atecoField.disabled = false;
     atecoField.value = "0.78";
   } else if (previdenza === "cassa-privata") {
-    atecoField.disabled = true;
     atecoField.value = "0.78";
   } else if (previdenza === "commerciante") {
-    atecoField.disabled = true;
     atecoField.value = "0.40";
   } else {
-    atecoField.disabled = false;
     atecoField.value = "";
   }
 }
@@ -56,12 +54,12 @@ function aggiungiFattura() {
   let imponibilePerImposta = imponibile;
 
   if (previdenza === 'gestione-separata') {
-    inps = imponibile * 0.2607; // INPS Gestione Separata (non deducibile)
+    inps = imponibile * 0.2607;
   } else if (previdenza === 'cassa-privata') {
-    inps = imponibile * 0.26;   // Cassa (deducibile)
+    inps = imponibile * 0.26;
     imponibilePerImposta = imponibile - inps;
   } else if (previdenza === 'commerciante') {
-    inps = imponibile * 0.2649; // Commercianti (non deducibile)
+    inps = imponibile * 0.2649;
   }
 
   const aliquotaImposta = tipoAzienda === 'start-up' ? 0.05 : 0.15;
@@ -72,7 +70,6 @@ function aggiungiFattura() {
 
   const fattura = { data, importo, imponibile, inps, imposta, totale, netto, trimestre };
   fatture.push(fattura);
-
   aggiornaStorico();
   aggiornaResiduo();
   aggiornaPagamenti();
@@ -141,4 +138,34 @@ function eliminaFattura(index) {
   aggiornaResiduo();
   aggiornaPagamenti();
   aggiornaRiepilogo();
+}
+
+function generaF24PDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const nome = document.getElementById('nome').value;
+  const cognome = document.getElementById('cognome').value;
+  const codiceFiscale = document.getElementById('codiceFiscale').value;
+  const tipoPagamento = document.getElementById('tipoPagamento').value;
+
+  doc.setFontSize(14);
+  doc.text("Fac-simile Modello F24", 20, 20);
+  doc.setFontSize(12);
+  doc.text(`Contribuente: ${nome} ${cognome}`, 20, 30);
+  doc.text(`Codice Fiscale: ${codiceFiscale}`, 20, 38);
+  doc.text(`Tipo Pagamento: ${tipoPagamento}`, 20, 46);
+
+  const imposteTotali = fatture.reduce((acc, f) => acc + f.imposta, 0);
+  const saldo = imposteTotali;
+  const acconto1 = saldo * 0.4;
+  const acconto2 = saldo * 0.6;
+
+  if (tipoPagamento === 'saldo') {
+    doc.text(`Saldo da versare: € ${saldo.toFixed(2)}`, 20, 60);
+    doc.text(`Primo Acconto: € ${acconto1.toFixed(2)}`, 20, 68);
+  } else {
+    doc.text(`Secondo Acconto da versare: € ${acconto2.toFixed(2)}`, 20, 60);
+  }
+
+  doc.save(`F24_${tipoPagamento}.pdf`);
 }
